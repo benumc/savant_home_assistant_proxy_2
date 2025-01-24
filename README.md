@@ -1,3 +1,5 @@
+**** V2 is a backend re-write that requires the newer included profiles ****
+
 # Savant Home Assistant Proxy
 
 This is a simple TCP proxy that allows your Savant system to communicate with Home Assistant.
