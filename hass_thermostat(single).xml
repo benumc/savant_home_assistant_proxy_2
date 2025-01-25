@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="racepoint_component_profile.xsd" manufacturer="hass" model="thermostat(single)" device_class="HVAC_controller" minimum_component_engine_version="8.5" rpm_xml_version="1.07" rpm_xml_version_date="$Date$" alias="Hass Thermostat">
+<component xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="racepoint_component_profile.xsd" manufacturer="hass" model="thermostat(single)" device_class="HVAC_controller" minimum_component_engine_version="8.5" rpm_xml_version="5.0" rpm_xml_version_date="$Date$" alias="Hass Thermostat">
   <notes>
+    5.0 : Feedback overhaul for proxy version 2
 
   </notes>
 
