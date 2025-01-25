@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="racepoint_component_profile.xsd"
     manufacturer="Hass" model="Energy_Monitor" alias="Hass Energy monitoring" device_class="Energy_Resource_monitor"
-        minimum_component_engine_version="10.2" rpm_xml_version="1.11">
+        minimum_component_engine_version="10.2" rpm_xml_version="5.0">
     
     <notes>
-      - Ver 1.10 First working version with the help of Benumc. Fl0zan0
+        5.0 : Feedback overhaul for proxy version 2
+      - 1.1 : First working version with the help of Benumc. Fl0zan0
     </notes>
 
     <control_interfaces preferred="ip">
