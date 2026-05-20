@@ -209,8 +209,17 @@ module HassMessageParsingMethods
 
   def update_with_hash(parent_key, msg_hash, parents = [])
     arr = msg_hash.map do |k, v|
-      # We add this key to the parents chain for deeper nesting
-      update_hass_data(parent_key, parents + [k], k, v) if included_with_filter?(k)
+      if k == 'hs_color' && v.is_a?(Array) && v.length == 2
+        # HA returns [hue 0-360, sat 0-100]; Savant slider expects 0-100 for both.
+        hue_pct = (v[0].to_f / 3.6).round
+        sat = v[1].to_f.round
+        @hs_state ||= {}
+        @hs_state[parent_key] = [v[0].to_f, v[1].to_f]
+        update_hass_data(parent_key, parents + ['hue'], 'hue', hue_pct) if included_with_filter?('hue')
+        update_hass_data(parent_key, parents + ['saturation'], 'saturation', sat) if included_with_filter?('saturation')
+      elsif included_with_filter?(k)
+        update_hass_data(parent_key, parents + [k], k, v)
+      end
       "#{k}:#{v}"
     end
 
@@ -357,10 +366,44 @@ module HassRequests
     level.to_i.zero? ? dimmer_off(entity_id) : dimmer_on(entity_id, level)
   end
 
-  def light_set_color_temp(entity_id, kelvin)
+  def color_temp_kelvin_set(entity_id, savant_value)
+    v = savant_value.to_f
+    kelvin = ((v * 33) + 2200).round
     send_data(
       type: :call_service, domain: :light, service: :turn_on,
-      service_data: { color_temp_kelvin: kelvin.to_i },
+      service_data: { color_temp_kelvin: kelvin },
+      target: { entity_id: entity_id }
+    )
+  end
+
+    def lumaris_color_temp_kelvin_set(entity_id, savant_value)
+    v = savant_value.to_f
+    kelvin = ((v * 22) + 1800).round
+    send_data(
+      type: :call_service, domain: :light, service: :turn_on,
+      service_data: { color_temp_kelvin: kelvin },
+      target: { entity_id: entity_id }
+    )
+  end
+
+  def hue_set(entity_id, savant_value)
+    hue = (savant_value.to_f * 3.6).clamp(0.0, 360.0)
+    saturation = (@hs_state[entity_id] || [0.0, 0.0])[1]
+    @hs_state[entity_id] = [hue, saturation]
+    send_data(
+      type: :call_service, domain: :light, service: :turn_on,
+      service_data: { hs_color: [hue, saturation] },
+      target: { entity_id: entity_id }
+    )
+  end
+
+  def saturation_set(entity_id, savant_value)
+    saturation = savant_value.to_f.clamp(0.0, 100.0)
+    hue = (@hs_state[entity_id] || [0.0, 0.0])[0]
+    @hs_state[entity_id] = [hue, saturation]
+    send_data(
+      type: :call_service, domain: :light, service: :turn_on,
+      service_data: { hs_color: [hue, saturation] },
       target: { entity_id: entity_id }
     )
   end
@@ -452,7 +495,15 @@ module HassRequests
       target: { entity_id: entity_id }
     )
   end
-
+  
+  def adb_command(entity_id, command)
+  send_data(
+      type: :call_service, domain: :androidtv, service: :adb_command,
+      service_data: { command: command },
+      target: { entity_id: entity_id }
+    )
+  end
+ 
   def remote_on(entity_id)
     send_data(
       type: :call_service, domain: :remote, service: :turn_on,

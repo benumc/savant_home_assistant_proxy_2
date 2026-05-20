@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="racepoint_component_profile.xsd" manufacturer="Hass" model="weather" device_class="Weather_controller" minimum_component_engine_version="0" rpm_xml_version="1.1">
+    
+  <notes>
+
+  </notes>
+  <control_interfaces preferred="ip">
+    <ip port="8080" response_time_length_ms="50" protocol="tcp">
+      <send_postfix type="hex">0A</send_postfix>
+      <receive_end_condition test_condition="data" type="hex">0A</receive_end_condition>
+    </ip>
+  </control_interfaces>
+
+  <media_interfaces>
+    <data name_on_component="Ethernet">
+      <combined_media>
+        <data_media type="ethernet" />
+        <control port="8080" />
+      </combined_media>
+    </data>
+
+    <internal name_on_component="Weather Monitor">
+      <environmental_media></environmental_media>
+      <resource resource_type="ENV_WEATHERCONTROLLER_SOURCE" />
+    </internal>
+  </media_interfaces>
+
+  <state_variable_list>
+    <state_variable name="subscribe_all_events" owning_logical_component="Weather" state_center_type="string" user_editable="yes">NO</state_variable>
+    <state_variable name="state_filter" owning_logical_component="Weather" state_center_type="string" state_center_binding="state_filter" user_editable="yes">state,temperature,humidity,pressure,dew_point,uv_index</state_variable>
+    <state_variable name="HassEntityId" owning_logical_component="Weather" state_center_type="string" state_center_binding="HassEntityId" user_editable="yes">HassEntityId</state_variable>
+  </state_variable_list>
+
+  <logical_component logical_component_name="Weather">
+    <implementation>
+      <internal name_on_component="Weather Monitor" />
+    </implementation>
+
+    <status_messages>
+      <status_message name="websocket_connected">
+        <constant type="character">hass_websocket_connected,</constant>
+        <data type="character" terminator_type="end_of_data">
+          <update state="ws_reconnected_at" type="string"></update>
+        </data>
+        <run_elements>
+          <actions>
+            <action name="resubscribe">
+              <execute_action_after_delay ms_delay="100" action_name="SubscribeEvents" action_type="CUSTOM"></execute_action_after_delay>
+              <execute_action_after_delay ms_delay="200" action_name="StateFilter" action_type="CUSTOM"></execute_action_after_delay>
+              <execute_action_after_delay ms_delay="300" action_name="SubscribeThermostatEntity" action_type="CUSTOM"></execute_action_after_delay>
+              <execute_action_after_delay ms_delay="400" action_name="SubscribeEntities" action_type="CUSTOM"></execute_action_after_delay>
+            </action>
+          </actions>
+        </run_elements>
+      </status_message>
+      <status_message name="pong">
+        <data type="character" terminator_type="character" terminator=",">
+          <update state="pong_id" type="string"></update>
+        </data>
+        <constant type="character">pong,</constant>
+        <data type="character" terminator_type="end_of_data">
+          <update state="last_pong_time" type="string"></update>
+        </data>
+      </status_message>
+
+      <status_message name="State">
+        <constant type="character">entity_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="EntityID" type="string"></update>
+        </data>
+        <constant type="character">substitute_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="SubstituteID" type="string"></update>
+        </data>
+        <constant type="character">parent_keys=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="ParentKeys" type="string"></update>
+        </data>
+        <constant type="character">attr_name=state&amp;attr_value=</constant>
+        <data type="character" terminator_type="end_of_data">
+          <update state="State" type="string"></update>
+        </data>
+      </status_message>
+            <status_message name="Temperature">
+        <constant type="character">entity_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="EntityID" type="string"></update>
+        </data>
+        <constant type="character">substitute_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="SubstituteID" type="string"></update>
+        </data>
+        <constant type="character">parent_keys=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="ParentKeys" type="string"></update>
+        </data>
+        <constant type="character">attr_name=temperature&amp;attr_value=</constant>
+        <data type="character" terminator_type="end_of_data">
+          <update state="CurrentTemperature" type="float"></update>
+        </data>
+      </status_message>
+      <status_message name="Humidity">
+        <constant type="character">entity_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="EntityID" type="string"></update>
+        </data>
+        <constant type="character">substitute_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="SubstituteID" type="string"></update>
+        </data>
+        <constant type="character">parent_keys=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="ParentKeys" type="string"></update>
+        </data>
+        <constant type="character">attr_name=humidity&amp;attr_value=</constant>
+        <data type="character" terminator_type="end_of_data">
+          <update state="CurrentHumidity" type="float"></update>
+        </data>
+      </status_message>
+      <status_message name="pressure">
+        <constant type="character">entity_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="EntityID" type="string"></update>
+        </data>
+        <constant type="character">substitute_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="SubstituteID" type="string"></update>
+        </data>
+        <constant type="character">parent_keys=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="ParentKeys" type="string"></update>
+        </data>
+        <constant type="character">attr_name=pressure&amp;attr_value=</constant>
+        <data type="character" terminator_type="end_of_data">
+          <update state="CurrentPressure" type="float"></update>
+        </data>
+      </status_message>
+        <status_message name="dew_point">
+        <constant type="character">entity_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="EntityID" type="string"></update>
+        </data>
+        <constant type="character">substitute_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="SubstituteID" type="string"></update>
+        </data>
+        <constant type="character">parent_keys=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="ParentKeys" type="string"></update>
+        </data>
+        <constant type="character">attr_name=dew_point&amp;attr_value=</constant>
+        <data type="character" terminator_type="end_of_data">
+          <update state="CurrentDew_point" type="float"></update>
+        </data>
+      </status_message>
+        <status_message name="uv_index">
+        <constant type="character">entity_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="EntityID" type="string"></update>
+        </data>
+        <constant type="character">substitute_id=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="SubstituteID" type="string"></update>
+        </data>
+        <constant type="character">parent_keys=</constant>
+        <data type="character" terminator_type="character" terminator="&amp;">
+          <update state="ParentKeys" type="string"></update>
+        </data>
+        <constant type="character">attr_name=uv_index&amp;attr_value=</constant>
+        <data type="character" terminator_type="end_of_data">
+          <update state="CurrentUv_index" type="float"></update>
+        </data>
+      </status_message>
+     </status_messages>
+    <custom_component_actions>
+     <action name="SubscribeEvents">
+        <execute_on_state_variable_condition name="subscribe_all_events" test_condition="not_equal">NO</execute_on_state_variable_condition>
+        <command_interface interface="ip">
+          <command response_required="no">
+            <command_string type="character">subscribe_events</command_string>
+          </command>
+        </command_interface>
+      </action>
+      <action name="StateFilter">
+        <command_interface interface="ip">
+          <command response_required="no">
+            <command_string type="character">state_filter,</command_string>
+            <parameter_list>
+              <parameter parameter_data_type="character" state_variable="state_filter" />
+            </parameter_list>
+          </command>
+        </command_interface>
+      </action>
+      <action name="SubscribeEntities">
+        <command_interface interface="ip">
+          <command response_required="no">
+            <parameter_list>
+              <parameter parameter_data_type="character">subscribe_entity,</parameter>
+              <parameter parameter_data_type="character" state_variable="HassEntityId"></parameter>
+            </parameter_list>
+            <delay ms_delay="50" />
+          </command>
+        </command_interface>
+      </action>
+    </custom_component_actions>
+  </logical_component>
+</component>

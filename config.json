@@ -1,6 +1,6 @@
 {
   "name": "Savant Home Assistant Proxy",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "slug": "savant_home_assistant_proxy",
   "description": "An add-on to run a two-way connection between a Savant System and Home Assistant.",
   "arch": ["armhf", "armv7", "aarch64", "amd64", "i386"],
