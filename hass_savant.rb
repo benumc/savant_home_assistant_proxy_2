@@ -386,6 +386,28 @@ module HassRequests
     )
   end
 
+  def hue_set(entity_id, savant_value)
+    hue = (savant_value.to_f * 3.6).clamp(0.0, 360.0)
+    saturation = (@hs_state[entity_id] || [0.0, 0.0])[1]
+    @hs_state[entity_id] = [hue, saturation]
+    send_data(
+      type: :call_service, domain: :light, service: :turn_on,
+      service_data: { hs_color: [hue, saturation] },
+      target: { entity_id: entity_id }
+    )
+  end
+
+  def saturation_set(entity_id, savant_value)
+    saturation = savant_value.to_f.clamp(0.0, 100.0)
+    hue = (@hs_state[entity_id] || [0.0, 0.0])[0]
+    @hs_state[entity_id] = [hue, saturation]
+    send_data(
+      type: :call_service, domain: :light, service: :turn_on,
+      service_data: { hs_color: [hue, saturation] },
+      target: { entity_id: entity_id }
+    )
+  end
+
   def shade_set(entity_id, level)
     send_data(
       type: :call_service, domain: :cover, service: :set_cover_position,
